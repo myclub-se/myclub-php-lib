@@ -1,0 +1,14 @@
+{
+  "name": "myclub/common-lib",
+  "description": "Shared logic for MyClub WordPress plugins",
+  "type": "library",
+  "license": "GPLv2 or later",
+  "autoload": {
+    "psr-4": {
+      "MyClub\\Common\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.4"
+  }
+}

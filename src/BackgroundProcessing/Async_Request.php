@@ -1,6 +1,6 @@
 <?php
 /**
- * WP Async Request
+ * WP Async RestApi
  *
  * @package Background-Processing
  *

@@ -63,82 +63,16 @@ class RestApi
     public function loadClubCalendar()
     {
         $service_path = 'calendar/';
+        $check_empty_key = $this->checkApiKey();
 
-        if ( empty( $this->apiKey ) ) {
-            $return_value = new stdClass();
-            $return_value->result = [];
-            $return_value->status = 401;
-            return $return_value;
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
         }
 
         $decoded = $this->get( $service_path, [ 'limit'   => "null", "version" => "2" ] );
 
         if ( is_wp_error( $decoded ) ) {
             error_log( 'Unable to load club calendar: Error occurred in API call' );
-            $return_value = new stdClass();
-            $return_value->result = [];
-            $return_value->status = 500;
-            return $return_value;
-        }
-
-        return $decoded;
-    }
-
-    /**
-     * Retrieves the menu items from the MyClub backend API.
-     *
-     * @return stdClass The menu items fetched from the API. If the API key is empty, it returns an empty array
-     *                   with a status code of 401. If there is an error in the API call, it returns an empty array
-     *                   with a status code of 500. Otherwise, it returns the decoded menu items.
-     * @since 1.0.0
-     */
-    public function loadMenuItems()
-    {
-        $service_path = 'team_menu/';
-
-        if ( empty( $this->apiKey ) ) {
-            $return_value = new stdClass();
-            $return_value->result = [];
-            $return_value->status = 401;
-            return $return_value;
-        }
-
-        $decoded = $this->get( $service_path );
-
-        if ( is_wp_error( $decoded ) ) {
-            error_log( 'Unable to load menu items: Error occurred in API call' );
-            $return_value = new stdClass();
-            $return_value->result = [];
-            $return_value->status = 500;
-            return $return_value;
-        }
-
-        return $decoded;
-    }
-
-    /**
-     * Retrieves the menu items for other teams from the MyClub backend API.
-     *
-     * @return stdClass The other teams menu items fetched from the API. If the API key is empty, it returns an empty array
-     *                   with a status code of 401. If there is an error in the API call, it returns an empty array
-     *                   with a status code of 500. Otherwise, it returns the decoded menu items for other teams.
-     * @since 1.0.0
-     */
-    public function loadOtherTeams()
-    {
-        $service_path = 'team_menu/other_teams/';
-
-        if ( empty( $this->apiKey ) ) {
-            $return_value = new stdClass();
-            $return_value->result = [];
-            $return_value->status = 401;
-            return $return_value;
-        }
-
-        $decoded = $this->get( $service_path, [ 'limit' => "null" ] );
-
-        if ( is_wp_error( $decoded ) ) {
-            error_log( 'Unable to load other teams: Error occurred in API call' );
             $return_value = new stdClass();
             $return_value->result = [];
             $return_value->status = 500;
@@ -193,16 +127,47 @@ class RestApi
     }
 
     /**
+     * Retrieves the menu items from the MyClub backend API.
+     *
+     * @return stdClass The menu items fetched from the API. If the API key is empty, it returns an empty array
+     *                   with a status code of 401. If there is an error in the API call, it returns an empty array
+     *                   with a status code of 500. Otherwise, it returns the decoded menu items.
+     * @since 1.0.0
+     */
+    public function loadMenuItems()
+    {
+        $service_path = 'team_menu/';
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
+        }
+
+        $decoded = $this->get( $service_path );
+
+        if ( is_wp_error( $decoded ) ) {
+            error_log( 'Unable to load menu items: Error occurred in API call' );
+            $return_value = new stdClass();
+            $return_value->result = [];
+            $return_value->status = 500;
+            return $return_value;
+        }
+
+        return $decoded;
+    }
+
+    /**
      * Retrieves news items from the MyClub backend API.
      *
      * @param string|null $groupId (Optional) The group ID to filter the news items. If not provided, all news items will be fetched.
+     * @param string|null $sectionId (Optional) The section ID to filter the news items. If not provided, all news items will be fetched.
      *
      * @return stdClass|bool The news items fetched from the API. If the API key is empty, it returns false.
      *                        If there is an error in the API call or the status code is not 200, it returns the
      *                        decoded JSON or WordPress error. Otherwise, it returns the decoded news items.
      * @since 1.0.0
      */
-    public function loadNews( string $groupId = null )
+    public function loadNews( string $groupId = null, string $sectionId = null )
     {
         if ( empty( $this->apiKey ) ) {
             return false;
@@ -213,12 +178,114 @@ class RestApi
             $args[ "team" ] = $groupId;
         }
 
+        if ( !is_null( $sectionId ) ) {
+            $args[ "section" ] = $sectionId;
+        }
+
         $decoded = $this->get( "news/", $args );
         if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
             error_log( 'Unable to load news: Error occurred in API call' );
         }
 
         return $decoded;
+    }
+
+    /**
+     * Retrieves the menu items for other teams from the MyClub backend API.
+     *
+     * @return stdClass The other teams menu items fetched from the API. If the API key is empty, it returns an empty array
+     *                   with a status code of 401. If there is an error in the API call, it returns an empty array
+     *                   with a status code of 500. Otherwise, it returns the decoded menu items for other teams.
+     * @since 1.0.0
+     */
+    public function loadOtherTeams()
+    {
+        $service_path = 'team_menu/other_teams/';
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
+        }
+
+        $decoded = $this->get( $service_path, [ 'limit' => "null" ] );
+
+        if ( is_wp_error( $decoded ) ) {
+            error_log( 'Unable to load other teams: Error occurred in API call' );
+            $return_value = new stdClass();
+            $return_value->result = [];
+            $return_value->status = 500;
+            return $return_value;
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * Retrieves the calendar data for a specific section from the MyClub backend API.
+     *
+     * @param string $sectionId The identifier of the section for which the calendar data will be fetched.
+     * @return stdClass The calendar data fetched from the API. If the API key is empty, it returns an empty array
+     *                  with a status code of 401. If there is an error in the API call, it returns an empty array
+     *                  with a status code of 500. Otherwise, it returns the decoded calendar data.
+     * @since 1.0.0
+     */
+    public function loadSectionCalendar( string $sectionId )
+    {
+        $service_path = "calendar/";
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
+        }
+
+        $decoded = $this->get( $service_path, [ 'limit'   => "null", "version" => "2", "section" => $sectionId ] );
+
+        if ( is_wp_error( $decoded ) ) {
+            error_log( 'Unable to load section calendar: Error occurred in API call' );
+            $return_value = new stdClass();
+            $return_value->result = [];
+            $return_value->status = 500;
+            return $return_value;
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * Validates the presence of the API key.
+     *
+     * @return stdClass|null Returns a status object with an empty result array and a status code of 401 if the API key is empty.
+     *                       Returns null if the API key is present.
+     */
+    private function checkApiKey(): ?stdClass {
+        if ( empty( $this->apiKey ) ) {
+            $return_value = new stdClass();
+            $return_value->result = [];
+            $return_value->status = 401;
+            return $return_value;
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves the request headers for an API call.
+     *
+     * @return array The request headers to be used in an API call. It includes the 'Accept' header set to 'application/json'
+     *               and the 'Authorization' header with the value of "Api-Key {API_KEY}". The API key is obtained from the
+     *               class property $apiKey.
+     * @since 1.0.0
+     */
+    private function createRequestHeaders(): array
+    {
+        return [
+            'Accept'             => 'application/json',
+            'Authorization'      => "Api-Key $this->apiKey",
+            'X-MyClub-RestApi'   => $this->pluginName,
+            'X-MyClub-MultiSite' => $this->multiSite ? 'true' : 'false',
+            'X-MyClub-Site'      => $this->site,
+            'X-MyClub-Version'   => $this->pluginVersion,
+        ];
     }
 
     /**
@@ -251,26 +318,6 @@ class RestApi
             $value->status = $response[ 'response' ][ 'code' ];
             return $value;
         }
-    }
-
-    /**
-     * Retrieves the request headers for an API call.
-     *
-     * @return array The request headers to be used in an API call. It includes the 'Accept' header set to 'application/json'
-     *               and the 'Authorization' header with the value of "Api-Key {API_KEY}". The API key is obtained from the
-     *               class property $apiKey.
-     * @since 1.0.0
-     */
-    private function createRequestHeaders(): array
-    {
-        return [
-            'Accept'             => 'application/json',
-            'Authorization'      => "Api-Key $this->apiKey",
-            'X-MyClub-RestApi'   => $this->pluginName,
-            'X-MyClub-MultiSite' => $this->multiSite ? 'true' : 'false',
-            'X-MyClub-Site'      => $this->site,
-            'X-MyClub-Version'   => $this->pluginVersion,
-        ];
     }
 
     /**

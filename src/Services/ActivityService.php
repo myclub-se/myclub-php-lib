@@ -26,7 +26,7 @@ class ActivityService
      * Initializes the database connection and sets up the table name for group activities.
      *
      * @return void
-     * @since 2.0.0
+     * @since 1.0.0
      */
     public static function init()
     {
@@ -42,7 +42,7 @@ class ActivityService
      * It incorporates constraints like unique identification, foreign keys, and default values.
      *
      * @return void
-     * @since 2.0.0
+     * @since 1.0.0
      */
     static function createActivityTables()
     {
@@ -51,6 +51,7 @@ class ActivityService
         $activities_table_sql = "CREATE TABLE " . static::$activities_table_name . " (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             uid varchar(20) NOT NULL UNIQUE,
+            section_id varchar(20) DEFAULT NULL,
             show_on_club_calendar tinyint(1) DEFAULT 0,
             title varchar(255) DEFAULT '',
             day DATE NOT NULL,
@@ -86,7 +87,7 @@ class ActivityService
      * Deletes the activity tables from the database if it exists.
      *
      * @return void
-     * @since 2.0.0
+     * @since 1.0.0
      */
     static function deleteActivityTables()
     {
@@ -100,7 +101,7 @@ class ActivityService
      * @param int $post_id The ID of the post to associate the activity with.
      * @param string $activity_id The unique identifier of the activity to be added.
      * @return bool Returns true if the activity was successfully added, or false if it already exists.
-     * @since 2.0.0
+     * @since 1.0.0
      */
     static function addActivityToPost( int $post_id, string $activity_id ): bool
     {
@@ -132,12 +133,13 @@ class ActivityService
      * @param array $calendar_array Optional array containing properties like 'show_on_club_calendar' for visibility settings.
      *
      * @return bool Returns true if a new activity is created or the activity is updated with changes. Returns false if there are no changes and the activity already exists.
-     * @since 2.0.0
+     * @since 1.0.0
      */
     static function createOrUpdateActivity( stdClass $activity, array $calendar_array = [] ): bool
     {
         $data = [
             'uid'           => $activity->uid,
+            'section_id'    => $activity->section_id,
             'title'         => $activity->title,
             'day'           => $activity->day,
             'start_time'    => $activity->start_time,
@@ -163,6 +165,7 @@ class ActivityService
             $update = true;
         } else {
             $compared_values = array_filter( [
+                "section_id",
                 "title",
                 "description",
                 "day",
@@ -195,7 +198,7 @@ class ActivityService
      *
      * @param string $activity_id The unique identifier of the activity to be deleted.
      * @return void
-     * @since 2.0.0
+     * @since 1.0.0
      */
     static function deleteActivity( string $activity_id )
     {
@@ -219,7 +222,7 @@ class ActivityService
      *
      * @param string $activity_id The unique identifier of the activity to retrieve.
      * @return object|null An object containing the activity data or null if no activity is found.
-     * @since 2.0.0
+     * @since 1.0.0
      */
     static function getActivity( string $activity_id ): ?object
     {
@@ -235,7 +238,7 @@ class ActivityService
      * Retrieves a list of club activities to display on the club calendar. Each activity is included only if it is marked to be shown on the club calendar.
      *
      * @return array|object|null A list of activities that should be shown on the club calendar, ordered by day, start time, and end time.
-     * @since 2.0.0
+     * @since 1.0.0
      */
     static function listClubActivities()
     {
@@ -248,11 +251,38 @@ class ActivityService
      * Retrieves a list of activity IDs that are marked to be shown on the club calendar.
      *
      * @return array|object|null An array of activity IDs that are set to be visible on the club calendar.
-     * @since 2.0.0
+     * @since 1.0.0
      */
     static function listClubActivityIds()
     {
         return static::$wpdb->get_col( "SELECT uid FROM " . static::$activities_table_name . " WHERE show_on_club_calendar = 1" );
+    }
+
+
+    /**
+     * Retrieves a list of activities for a specific section. Activities are filtered based on the provided section ID.
+     *
+     * @param string $sectionId The ID of the section for which activities should be retrieved.
+     * @return array|object|null A list of activities for the specified section, ordered by day, start time, and end time.
+     * @since 1.0.0
+     */
+    static function listSectionActivities( string $sectionId )
+    {
+        return static::$wpdb->get_results(
+            "SELECT * FROM " . static::$activities_table_name . " WHERE section_id = '$sectionId' ORDER BY day, start_time, end_time",
+        );
+    }
+
+    /**
+     * Retrieves a list of activity IDs associated with the specified section.
+     *
+     * @param string $sectionId The unique identifier of the section for which to fetch activity IDs.
+     * @return array An array of activity IDs corresponding to the given section.
+     * @since 1.0.0
+     */
+    static function listSectionActivityIds( string $sectionId )
+    {
+        return static::$wpdb->get_col( "SELECT uid FROM " . static::$activities_table_name . " WHERE section_id = '$sectionId'" );
     }
 
     /**

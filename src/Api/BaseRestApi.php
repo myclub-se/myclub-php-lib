@@ -8,11 +8,11 @@ use stdClass;
 use WP_Error;
 
 /**
- * Class RestApi
+ * Class BaseRestApi
  *
  * Provides methods to interact with the MyClub backend API.
  */
-class RestApi
+class BaseRestApi
 {
     const MYCLUB_SERVER_API_PATH = 'https://member.myclub.se/api/v3/external/';
 
@@ -221,6 +221,35 @@ class RestApi
     }
 
     /**
+     * Retrieves sections from the MyClub backend API.
+     *
+     * @return stdClass The sections fetched from the API. If the API key is empty, it returns an appropriate response.
+     *                  If there is an error during the API call, it returns an object containing an empty result array
+     *                  with a status code of 500. Otherwise, it returns the decoded sections data.
+     */
+    public function loadSections()
+    {
+        $service_path = 'sections/';
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
+        }
+
+        $decoded = $this->get( $service_path, [ 'limit' => "null" ] );
+
+        if ( is_wp_error( $decoded ) ) {
+            error_log( 'Unable to load sections: Error occurred in API call' );
+            $return_value = new stdClass();
+            $return_value->result = [];
+            $return_value->status = 500;
+            return $return_value;
+        }
+
+        return $decoded;
+    }
+
+    /**
      * Retrieves the calendar data for a specific section from the MyClub backend API.
      *
      * @param string $sectionId The identifier of the section for which the calendar data will be fetched.
@@ -238,7 +267,7 @@ class RestApi
             return $check_empty_key;
         }
 
-        $decoded = $this->get( $service_path, [ 'limit'   => "null", "version" => "2", "section" => $sectionId ] );
+        $decoded = $this->get( $service_path, [ 'limit' => "null", "version" => "2", "section" => $sectionId ] );
 
         if ( is_wp_error( $decoded ) ) {
             error_log( 'Unable to load section calendar: Error occurred in API call' );

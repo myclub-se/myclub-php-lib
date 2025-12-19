@@ -2,22 +2,22 @@
 
 namespace MyClub\Common\Services;
 
-use stdClass;
-
 if ( !defined( 'ABSPATH' ) ) exit;
 
+use stdClass;
+
 /**
- * Class ActivityService
+ * Class BaseActivityService
  *
  * A service responsible for managing activities related to posts and club calendars. It provides methods
  * to create, update, delete, and retrieve activities stored in a database table. It also allows listing of
  * activities in various contexts like club calendars or specific post associations.
  */
-class ActivityService
+class BaseActivityService
 {
-    private static $wpdb;
-    private static string $activities_table_name;
-    private static string $activities_link_table_name;
+    protected static $wpdb;
+    protected static string $activities_table_name;
+    protected static string $activities_link_table_name;
 
     protected static string $activities_table_suffix = '';
     protected static string $activities_link_table_suffix = '';

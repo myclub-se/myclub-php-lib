@@ -33,14 +33,14 @@ class BaseRestApi
      *
      * Initializes the object with the provided API key or retrieves the API key from the options if not provided.
      *
-     * @param string $apiKey The API key to be used - required.
      * @param string $pluginName The name of the plugin - required.
      * @param string $pluginVersion The version of the plugin - required.
+     * @param string|null $apiKey The API key to be used - required.
      *
      * @return void
      * @since 1.0.0
      */
-    public function __construct( string $apiKey, string $pluginName, string $pluginVersion )
+    public function __construct( string $pluginName, string $pluginVersion, string $apiKey = null )
     {
         $this->apiKey = !empty( $apiKey ) ? $apiKey : get_option( $this->apiKeyOptionName );
         $this->pluginName = $pluginName;

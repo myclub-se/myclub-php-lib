@@ -23,7 +23,7 @@ class BaseActivityService
     protected static string $activities_link_table_suffix = '';
 
     /**
-     * Initializes the database connection and sets up the table name for group activities.
+     * Initializes the database connection and sets up the table name for activities.
      *
      * @return void
      * @since 1.0.0

@@ -692,12 +692,12 @@ abstract class Background_Process extends Async_Request {
 	 * @return mixed
 	 */
 	public function schedule_cron_healthcheck( $schedules ) {
-		$interval = $this->get_cron_interval();
+        $interval = $this->get_cron_interval();
 
 		// Adds an "Every NNN Minute(s)" schedule to the existing cron schedules.
 		$schedules[ $this->cron_interval_identifier ] = array(
 			'interval' => MINUTE_IN_SECONDS * $interval,
-			'display'  => 1 === $interval ? esc_html__( 'Every Minute', 'myclub-groups' ) : sprintf( esc_html__( 'Every %d Minutes', 'myclub-groups' ), $interval ),
+			'display'  => 1 === $interval ? esc_html( 'Every Minute' ) : esc_html( sprintf( 'Every %d Minutes', $interval ) ),
 		);
 
 		return $schedules;

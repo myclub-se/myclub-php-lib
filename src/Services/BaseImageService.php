@@ -9,7 +9,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 /**
  * Provides functionality to manage images in the WordPress media library.
  */
-class BaseImageService {
+class BaseImageService
+{
     const MYCLUB_IMAGES = 'myclub-images';
 
     /**

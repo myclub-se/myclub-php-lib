@@ -69,7 +69,9 @@ class BaseRestApi
             return $check_empty_key;
         }
 
-        $decoded = $this->get( $service_path, [ 'limit'   => "null", "version" => "2" ] );
+        $decoded = $this->get( $service_path, [ 'limit'   => "null",
+                                                "version" => "2"
+        ] );
 
         if ( is_wp_error( $decoded ) ) {
             error_log( 'Unable to load club calendar: Error occurred in API call' );
@@ -106,7 +108,9 @@ class BaseRestApi
             if ( $members->status === 200 ) {
                 $decoded->result->members = $members->result->results;
 
-                $activities = $this->get( "teams/$groupId/calendar/", [ "limit"   => "null", "version" => "2" ] );
+                $activities = $this->get( "teams/$groupId/calendar/", [ "limit"   => "null",
+                                                                        "version" => "2"
+                ] );
                 if ( $activities->status === 200 ) {
                     $decoded->result->activities = $activities->result->results;
                 } else {
@@ -267,7 +271,10 @@ class BaseRestApi
             return $check_empty_key;
         }
 
-        $decoded = $this->get( $service_path, [ 'limit' => "null", "version" => "2", "section" => $sectionId ] );
+        $decoded = $this->get( $service_path, [ 'limit'   => "null",
+                                                "version" => "2",
+                                                "section" => $sectionId
+        ] );
 
         if ( is_wp_error( $decoded ) ) {
             error_log( 'Unable to load section calendar: Error occurred in API call' );
@@ -286,7 +293,8 @@ class BaseRestApi
      * @return stdClass|null Returns a status object with an empty result array and a status code of 401 if the API key is empty.
      *                       Returns null if the API key is present.
      */
-    private function checkApiKey(): ?stdClass {
+    private function checkApiKey(): ?stdClass
+    {
         if ( empty( $this->apiKey ) ) {
             $return_value = new stdClass();
             $return_value->result = [];

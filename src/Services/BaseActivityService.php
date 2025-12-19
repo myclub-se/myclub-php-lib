@@ -207,7 +207,9 @@ class BaseActivityService
 
     static function removeActivityFromPost( int $post_id, string $activity_id )
     {
-        static::$wpdb->delete( static::$activities_link_table_name, [ 'post_id' => $post_id, 'activity_uid' => $activity_id ] );
+        static::$wpdb->delete( static::$activities_link_table_name, [ 'post_id'      => $post_id,
+                                                                      'activity_uid' => $activity_id
+        ] );
 
         if ( count( static::listActivityPostIds( $activity_id ) ) === 0 ) {
             $activity = static::getActivity( $activity_id );

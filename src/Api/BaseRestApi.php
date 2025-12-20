@@ -224,6 +224,33 @@ class BaseRestApi
         return $decoded;
     }
 
+    public function loadSection( string $sectionId )
+    {
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
+        }
+
+        $decoded = $this->get( "sections/$sectionId/" );
+
+        if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
+            error_log( 'Unable to load group: Error occurred in API call' );
+        } else {
+            $activities = $this->get( "calendar/", [ "limit"   => "null", "section_id" => $sectionId ] );
+            if ( $activities->status === 200 ) {
+                $decoded->result->activities = $activities->result->results;
+            } else {
+                $return_value = new stdClass();
+                $return_value->result = [];
+                $return_value->status = 500;
+                return $return_value;
+            }
+        }
+
+        return $decoded;
+    }
+
     /**
      * Retrieves sections from the MyClub backend API.
      *

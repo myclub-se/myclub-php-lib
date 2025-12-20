@@ -2,7 +2,7 @@
 
 namespace MyClub\Common\Services;
 
-if ( !defined( 'ABSPATH' ) ) exit;
+if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 use stdClass;
 

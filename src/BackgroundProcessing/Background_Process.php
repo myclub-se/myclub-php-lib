@@ -13,10 +13,10 @@
 
 namespace MyClub\Common\BackgroundProcessing;
 
+if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 use stdClass;
 use WP_Error;
-
-if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 /**
  * Abstract WP_Background_Process class.
@@ -739,7 +739,7 @@ abstract class Background_Process extends Async_Request
         // Adds an "Every NNN Minute(s)" schedule to the existing cron schedules.
         $schedules[ $this->cron_interval_identifier ] = array (
             'interval' => MINUTE_IN_SECONDS * $interval,
-            'display'  => 1 === $interval ? esc_html( 'Every Minute' ) : esc_html( sprintf( 'Every %d Minutes', $interval ) ),
+            'display'  => 1 === $interval ? esc_html__( 'Every minute' ) : sprintf( esc_html__( 'Every %d minutes' ), $interval ),
         );
 
         return $schedules;

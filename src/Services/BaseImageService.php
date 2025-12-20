@@ -1,10 +1,11 @@
 <?php
 
-namespace Myclub\Common\Services;
+namespace MyClub\Common\Services;
+
+if ( !defined( 'ABSPATH' ) ) exit;
 
 use WP_Query;
 
-if ( !defined( 'ABSPATH' ) ) exit;
 
 /**
  * Provides functionality to manage images in the WordPress media library.

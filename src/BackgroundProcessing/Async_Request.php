@@ -14,9 +14,9 @@
 
 namespace MyClub\Common\BackgroundProcessing;
 
-use WP_Error;
-
 if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+use WP_Error;
 
 /**
  * Abstract Async_Request class.

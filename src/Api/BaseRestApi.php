@@ -235,7 +235,7 @@ class BaseRestApi
         $decoded = $this->get( "sections/$sectionId/" );
 
         if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
-            error_log( 'Unable to load group: Error occurred in API call' );
+            error_log( 'Unable to load section: Error occurred in API call' );
         } else {
             $activities = $this->get( "calendar/", [ "limit"   => "null", "section_id" => $sectionId ] );
             if ( $activities->status === 200 ) {

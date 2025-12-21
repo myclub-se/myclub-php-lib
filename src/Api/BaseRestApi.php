@@ -8,11 +8,11 @@ use stdClass;
 use WP_Error;
 
 /**
- * Class RestApi
+ * Class BaseRestApi
  *
  * Provides methods to interact with the MyClub backend API.
  */
-class RestApi
+class BaseRestApi
 {
     const MYCLUB_SERVER_API_PATH = 'https://member.myclub.se/api/v3/external/';
 
@@ -33,14 +33,14 @@ class RestApi
      *
      * Initializes the object with the provided API key or retrieves the API key from the options if not provided.
      *
-     * @param string $apiKey The API key to be used - required.
      * @param string $pluginName The name of the plugin - required.
      * @param string $pluginVersion The version of the plugin - required.
+     * @param string|null $apiKey The API key to be used - required.
      *
      * @return void
      * @since 1.0.0
      */
-    public function __construct( string $apiKey, string $pluginName, string $pluginVersion )
+    public function __construct( string $pluginName, string $pluginVersion, string $apiKey = null )
     {
         $this->apiKey = !empty( $apiKey ) ? $apiKey : get_option( $this->apiKeyOptionName );
         $this->pluginName = $pluginName;
@@ -69,7 +69,9 @@ class RestApi
             return $check_empty_key;
         }
 
-        $decoded = $this->get( $service_path, [ 'limit'   => "null", "version" => "2" ] );
+        $decoded = $this->get( $service_path, [ 'limit'   => "null",
+                                                "version" => "2"
+        ] );
 
         if ( is_wp_error( $decoded ) ) {
             error_log( 'Unable to load club calendar: Error occurred in API call' );
@@ -106,7 +108,9 @@ class RestApi
             if ( $members->status === 200 ) {
                 $decoded->result->members = $members->result->results;
 
-                $activities = $this->get( "teams/$groupId/calendar/", [ "limit"   => "null", "version" => "2" ] );
+                $activities = $this->get( "teams/$groupId/calendar/", [ "limit"   => "null",
+                                                                        "version" => "2"
+                ] );
                 if ( $activities->status === 200 ) {
                     $decoded->result->activities = $activities->result->results;
                 } else {
@@ -220,6 +224,62 @@ class RestApi
         return $decoded;
     }
 
+    public function loadSection( string $sectionId )
+    {
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
+        }
+
+        $decoded = $this->get( "sections/$sectionId/" );
+
+        if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
+            error_log( 'Unable to load section: Error occurred in API call' );
+        } else {
+            $activities = $this->get( "calendar/", [ "limit"   => "null", "section_id" => $sectionId ] );
+            if ( $activities->status === 200 ) {
+                $decoded->result->activities = $activities->result->results;
+            } else {
+                $return_value = new stdClass();
+                $return_value->result = [];
+                $return_value->status = 500;
+                return $return_value;
+            }
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * Retrieves sections from the MyClub backend API.
+     *
+     * @return stdClass The sections fetched from the API. If the API key is empty, it returns an appropriate response.
+     *                  If there is an error during the API call, it returns an object containing an empty result array
+     *                  with a status code of 500. Otherwise, it returns the decoded sections data.
+     */
+    public function loadSections()
+    {
+        $service_path = 'sections/';
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
+        }
+
+        $decoded = $this->get( $service_path, [ 'limit' => "null" ] );
+
+        if ( is_wp_error( $decoded ) ) {
+            error_log( 'Unable to load sections: Error occurred in API call' );
+            $return_value = new stdClass();
+            $return_value->result = [];
+            $return_value->status = 500;
+            return $return_value;
+        }
+
+        return $decoded;
+    }
+
     /**
      * Retrieves the calendar data for a specific section from the MyClub backend API.
      *
@@ -238,7 +298,10 @@ class RestApi
             return $check_empty_key;
         }
 
-        $decoded = $this->get( $service_path, [ 'limit'   => "null", "version" => "2", "section" => $sectionId ] );
+        $decoded = $this->get( $service_path, [ 'limit'   => "null",
+                                                "version" => "2",
+                                                "section" => $sectionId
+        ] );
 
         if ( is_wp_error( $decoded ) ) {
             error_log( 'Unable to load section calendar: Error occurred in API call' );
@@ -382,7 +445,8 @@ class RestApi
      * @return stdClass|null Returns a status object with an empty result array and a status code of 401 if the API key is empty.
      *                       Returns null if the API key is present.
      */
-    private function checkApiKey(): ?stdClass {
+    private function checkApiKey(): ?stdClass
+    {
         if ( empty( $this->apiKey ) ) {
             $return_value = new stdClass();
             $return_value->result = [];

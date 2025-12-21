@@ -11,7 +11,7 @@ use Exception;
 /**
  * A utility class for managing URLs, cache, and posts in a WordPress environment.
  */
-class Utils
+class BaseUtils
 {
     /**
      * Change the host name in a given URL to match the host name of the WordPress site.
@@ -44,6 +44,8 @@ class Utils
      *
      * @return bool True if the cache was successfully cleared, false if no supported caching plugin was detected or
      * an error occurred.
+     *
+     * @since 1.0.0
      */
     static function clearCacheForPage( int $post_id ): bool
     {
@@ -151,6 +153,7 @@ class Utils
      *
      * @return string|false The identifier of the detected caching plugin ('wp_super_cache', 'w3_total_cache',
      * 'wp_rocket', or 'litespeed_cache'), or false if no supported caching plugin is detected.
+     *
      * @since 1.0.0
      */
     static function detectCachePlugin()
@@ -227,6 +230,29 @@ class Utils
     }
 
     /**
+     * Processes a list of activities by modifying their descriptions and returns the data in JSON format.
+     *
+     * @param array $activities An array of activity objects, each containing a description property to clean and format.
+     * @return string A JSON-encoded string representation of the processed activities.
+     * @since 1.0.0
+     */
+    static function prepareActivitiesJson( array $activities ): string
+    {
+        foreach ( $activities as $activity ) {
+            $activity->id = $activity->uid;
+            unset( $activity->uid );
+            $activity->description = str_replace( '<br /> <br />', '<br />', $activity->description );
+            $activity->description = str_replace( '<br /><br />', '<br />', $activity->description );
+            $activity->description = addslashes( str_replace( '<br /><br /><br />', '<br /><br />', $activity->description ) );
+            if ( empty( trim( wp_strip_all_tags( $activity->description ) ) ) ) {
+                $activity->description = '';
+            }
+        }
+
+        return wp_json_encode( $activities, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT );
+    }
+
+    /**
      * Sanitize an array by recursively sanitizing text fields.
      *
      * @param array $array The array to be sanitized.
@@ -239,7 +265,7 @@ class Utils
     {
         foreach ( $array as $key => &$value ) {
             if ( is_array( $value ) ) {
-                $value = Utils::sanitizeArray( $value );
+                $value = BaseUtils::sanitizeArray( $value );
             } else {
                 $value = sanitize_text_field( $value );
             }

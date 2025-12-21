@@ -2,28 +2,28 @@
 
 namespace MyClub\Common\Services;
 
+if ( !defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 use stdClass;
 
-if ( !defined( 'ABSPATH' ) ) exit;
-
 /**
- * Class ActivityService
+ * Class BaseActivityService
  *
  * A service responsible for managing activities related to posts and club calendars. It provides methods
  * to create, update, delete, and retrieve activities stored in a database table. It also allows listing of
  * activities in various contexts like club calendars or specific post associations.
  */
-class ActivityService
+class BaseActivityService
 {
-    private static $wpdb;
-    private static string $activities_table_name;
-    private static string $activities_link_table_name;
+    protected static $wpdb;
+    protected static string $activities_table_name;
+    protected static string $activities_link_table_name;
 
     protected static string $activities_table_suffix = '';
     protected static string $activities_link_table_suffix = '';
 
     /**
-     * Initializes the database connection and sets up the table name for group activities.
+     * Initializes the database connection and sets up the table name for activities.
      *
      * @return void
      * @since 1.0.0
@@ -207,7 +207,9 @@ class ActivityService
 
     static function removeActivityFromPost( int $post_id, string $activity_id )
     {
-        static::$wpdb->delete( static::$activities_link_table_name, [ 'post_id' => $post_id, 'activity_uid' => $activity_id ] );
+        static::$wpdb->delete( static::$activities_link_table_name, [ 'post_id'      => $post_id,
+                                                                      'activity_uid' => $activity_id
+        ] );
 
         if ( count( static::listActivityPostIds( $activity_id ) ) === 0 ) {
             $activity = static::getActivity( $activity_id );

@@ -1,12 +1,17 @@
 <?php
 
-namespace Myclub\Common\Services;
-
-use WP_Query;
+namespace MyClub\Common\Services;
 
 if ( !defined( 'ABSPATH' ) ) exit;
 
-class ImageService {
+use WP_Query;
+
+
+/**
+ * Provides functionality to manage images in the WordPress media library.
+ */
+class BaseImageService
+{
     const MYCLUB_IMAGES = 'myclub-images';
 
     /**
@@ -25,7 +30,7 @@ class ImageService {
         $attachment_id = null;
 
         if ( isset( $image ) ) {
-            $attachment = ImageService::addImage( $image->raw->url, $prefix, $caption, $image_type );
+            $attachment = BaseImageService::addImage( $image->raw->url, $prefix, $caption, $image_type );
             if ( isset( $attachment ) ) {
                 $attachment_id = $attachment[ 'id' ];
             }
@@ -128,8 +133,8 @@ class ImageService {
             }
 
             // Assign taxonomy term if available
-            if ( $image_type && taxonomy_exists( ImageService::MYCLUB_IMAGES ) ) {
-                wp_set_object_terms( $attachment_id, $image_type, ImageService::MYCLUB_IMAGES, false );
+            if ( $image_type && taxonomy_exists( BaseImageService::MYCLUB_IMAGES ) ) {
+                wp_set_object_terms( $attachment_id, $image_type, BaseImageService::MYCLUB_IMAGES, false );
             }
 
             wp_update_post( array (

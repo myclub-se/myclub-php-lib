@@ -390,7 +390,7 @@ class BaseRestApi
         return $decoded;
     }
 
-    public function book_slot(string $bookableId, string $slotId, string $startTime, string $endTime, string $email, string $firstName = null, string $lastName = null)
+    public function bookSlot(string $bookableId, string $slotId, string $startTime, string $endTime, string $email, string $firstName = null, string $lastName = null)
     {
         $check_empty_key = $this->checkApiKey();
 
@@ -415,7 +415,7 @@ class BaseRestApi
 
     private function post(string $service_path, array $data = [])
     {
-        $args = $this->get_post_args($data);
+        $args = $this->getPostArgs($data);
         $response = wp_remote_post($this->getServerUrl($service_path), $args);
 
         if (is_wp_error($response)) {
@@ -429,7 +429,7 @@ class BaseRestApi
         }
     }
 
-    protected function get_post_args(array $data = [])
+    protected function getPostArgs(array $data = [])
     {
         return array(
             'timeout' => 5,

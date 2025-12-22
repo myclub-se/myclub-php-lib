@@ -314,6 +314,131 @@ class BaseRestApi
         return $decoded;
     }
 
+    public function loadBookables()
+    {
+        $service_path = 'bookables/';
+
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return $check_empty_key;
+        }
+
+        $decoded = $this->get($service_path, ['limit' => "null"]);
+
+        if (is_wp_error($decoded)) {
+            error_log('Unable to load bookable items: Error occurred in API call');
+            $return_value = new stdClass();
+            $return_value->result = [];
+            $return_value->status = 500;
+            return $return_value;
+        }
+
+        return $decoded;
+    }
+
+    public function loadBookableSlots(string $bookableId = null, string $start_date = null, string $end_date = null)
+    {
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return false;
+        }
+
+        if (is_null($bookableId)) {
+            return false;
+        }
+        $args = array(
+            "limit" => "null"
+        );
+        if (!is_null($start_date)) {
+            $args["start_date"] = $start_date;
+        }
+        if (!is_null($end_date)) {
+            $args["end_date"] = $end_date;
+        }
+
+        $service_path = sprintf("bookables/%s/slots/", $bookableId);
+
+        $decoded = $this->get($service_path, $args);
+        if (is_wp_error($decoded) || $decoded->status !== 200) {
+            error_log('Unable to load bookable slots: Error occurred in API call');
+        }
+
+        return $decoded;
+    }
+
+    public function loadBookableSlot(string $bookableId = null, string $slotId = null)
+    {
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return false;
+        }
+
+        if (is_null($bookableId) || is_null($slotId)) {
+            return false;
+        }
+
+        $service_path = sprintf("bookables/%s/slots/%s/", $bookableId, $slotId);
+
+        $decoded = $this->get($service_path);
+        if (is_wp_error($decoded) || $decoded->status !== 200) {
+            error_log('Unable to load bookable slots: Error occurred in API call');
+        }
+
+        return $decoded;
+    }
+
+    public function bookSlot(string $bookableId, string $slotId, string $startTime, string $endTime, string $email, string $firstName = null, string $lastName = null)
+    {
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return false;
+        }
+        $args = array(
+            "start_time" => $startTime,
+            "end_time" => $endTime,
+            "email" => $email,
+            "first_name" => $firstName,
+            "last_name" => $lastName,
+            "bookable_zones_taken" => 1,
+        );
+        $service_path = sprintf("bookables/%s/slots/%s/book/", $bookableId, $slotId);
+        $decoded = $this->post($service_path, $args);
+        if (is_wp_error($decoded)) {
+            error_log('Unable to book slot: Error occurred in API call');
+        }
+        return $decoded;
+    }
+
+    private function post(string $service_path, array $data = [])
+    {
+        $args = $this->getPostArgs($data);
+        $response = wp_remote_post($this->getServerUrl($service_path), $args);
+
+        if (is_wp_error($response)) {
+            error_log('Error occurred during API get call, additional info: ' . $response->get_error_message());
+            return $response;
+        } else {
+            $value = new stdClass();
+            $value->result = json_decode(wp_remote_retrieve_body($response));
+            $value->status = $response['response']['code'];
+            return $value;
+        }
+    }
+
+    protected function getPostArgs(array $data = [])
+    {
+        return array(
+            'timeout' => 5,
+            'body' => json_encode($data),
+            'headers' => $this->createRequestHeaders(),
+            'sslverify' => apply_filters( 'https_local_ssl_verify', false ), // Local requests, fine to pass false.
+        );
+    }
+
     /**
      * Validates the presence of the API key.
      *

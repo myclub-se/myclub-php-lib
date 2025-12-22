@@ -49,7 +49,7 @@ class BaseUtils
      */
     static function clearCacheForPage( int $post_id ): bool
     {
-        $cache_plugin = Utils::detectCachePlugin();
+        $cache_plugin = static::detectCachePlugin();
 
         try {
             switch ( $cache_plugin ) {
@@ -265,7 +265,7 @@ class BaseUtils
     {
         foreach ( $array as $key => &$value ) {
             if ( is_array( $value ) ) {
-                $value = BaseUtils::sanitizeArray( $value );
+                $value = static::sanitizeArray( $value );
             } else {
                 $value = sanitize_text_field( $value );
             }

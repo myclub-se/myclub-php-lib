@@ -739,6 +739,7 @@ abstract class Background_Process extends Async_Request
         // Adds an "Every NNN Minute(s)" schedule to the existing cron schedules.
         $schedules[ $this->cron_interval_identifier ] = array (
             'interval' => MINUTE_IN_SECONDS * $interval,
+            /* translators: 1: the interval in minutes for the cron job */
             'display'  => 1 === $interval ? esc_html__( 'Every minute' ) : sprintf( esc_html__( 'Every %d minutes' ), $interval ),
         );
 

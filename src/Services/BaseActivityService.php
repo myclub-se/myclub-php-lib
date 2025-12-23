@@ -48,7 +48,12 @@ class BaseActivityService
     {
         $charset_collate = static::$wpdb->get_charset_collate();
 
-        $activities_table_sql = "CREATE TABLE " . static::$activities_table_name . " (
+        $activities_table = static::$activities_table_name;
+        $activities_link_table = static::$activities_link_table_name;
+        $posts_table = static::$wpdb->prefix . 'posts';
+
+        $activities_table_sql = "
+        CREATE TABLE {$activities_table} (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             uid varchar(20) NOT NULL UNIQUE,
             section_id varchar(20) DEFAULT NULL,
@@ -65,20 +70,23 @@ class BaseActivityService
             meet_up_time int(11) DEFAULT NULL,
             meet_up_place varchar(255) DEFAULT '',
             PRIMARY KEY (id)
-        ) $charset_collate;";
+        ) {$charset_collate};
+    ";
 
-        $activities_link_table_sql = "CREATE TABLE " . static::$activities_link_table_name . " (
+        $activities_link_table_sql = "
+        CREATE TABLE {$activities_link_table} (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             post_id BIGINT UNSIGNED NOT NULL,
             activity_uid varchar(20) NOT NULL,
             PRIMARY KEY (id),
             UNIQUE KEY unique_post_activity (post_id, activity_uid),
-            FOREIGN KEY (post_id) REFERENCES " . static::$wpdb->prefix . "posts(ID) ON DELETE CASCADE,
-            FOREIGN KEY (activity_uid) REFERENCES " . static::$activities_table_name . "(uid) ON DELETE CASCADE
-        ) $charset_collate;";
+            FOREIGN KEY (post_id) REFERENCES {$posts_table}(ID) ON DELETE CASCADE,
+            FOREIGN KEY (activity_uid) REFERENCES {$activities_table}(uid) ON DELETE CASCADE
+        ) {$charset_collate};
+    ";
 
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
         dbDelta( $activities_table_sql );
         dbDelta( $activities_link_table_sql );
     }
@@ -91,8 +99,11 @@ class BaseActivityService
      */
     static function deleteActivityTables()
     {
-        static::$wpdb->query( "DROP TABLE IF EXISTS " . static::$activities_link_table_name );
-        static::$wpdb->query( "DROP TABLE IF EXISTS " . static::$activities_table_name );
+        $link_table_name = static::$activities_link_table_name;
+        $table_name = static::$activities_table_name;
+
+        static::$wpdb->query( "DROP TABLE IF EXISTS {$link_table_name}" );
+        static::$wpdb->query( "DROP TABLE IF EXISTS {$table_name}" );
     }
 
     /**
@@ -105,9 +116,11 @@ class BaseActivityService
      */
     static function addActivityToPost( int $post_id, string $activity_id ): bool
     {
+        $table_name = static::$activities_link_table_name;
+
         $existing_row = static::$wpdb->get_row(
             static::$wpdb->prepare(
-                "SELECT id FROM " . static::$activities_link_table_name . " WHERE post_id = %d AND activity_uid = %s",
+                "SELECT id FROM {$table_name} WHERE post_id = %d AND activity_uid = %s",
                 $post_id,
                 $activity_id
             )
@@ -117,7 +130,7 @@ class BaseActivityService
             return false;
         }
 
-        static::$wpdb->insert( static::$activities_link_table_name, [
+        static::$wpdb->insert( $table_name, [
             'post_id'      => $post_id,
             'activity_uid' => $activity_id
         ] );
@@ -228,9 +241,11 @@ class BaseActivityService
      */
     static function getActivity( string $activity_id ): ?object
     {
+        $table_name = static::$activities_table_name;
+
         return static::$wpdb->get_row(
             static::$wpdb->prepare(
-                "SELECT * FROM " . static::$activities_table_name . " WHERE uid = %s",
+                "SELECT * FROM {$table_name} WHERE uid = %s",
                 $activity_id
             )
         );
@@ -244,8 +259,10 @@ class BaseActivityService
      */
     static function listClubActivities()
     {
+        $table_name = static::$activities_table_name;
+
         return static::$wpdb->get_results(
-            "SELECT * FROM " . static::$activities_table_name . " WHERE show_on_club_calendar = 1 ORDER BY day, start_time, end_time",
+            "SELECT * FROM {$table_name} WHERE show_on_club_calendar = 1 ORDER BY day, start_time, end_time",
         );
     }
 
@@ -257,7 +274,9 @@ class BaseActivityService
      */
     static function listClubActivityIds()
     {
-        return static::$wpdb->get_col( "SELECT uid FROM " . static::$activities_table_name . " WHERE show_on_club_calendar = 1" );
+        $table_name = static::$activities_table_name;
+
+        return static::$wpdb->get_col( "SELECT uid FROM {$table_name} WHERE show_on_club_calendar = 1" );
     }
 
 
@@ -270,8 +289,13 @@ class BaseActivityService
      */
     static function listSectionActivities( string $sectionId )
     {
+        $table_name = static::$activities_table_name;
+
         return static::$wpdb->get_results(
-            "SELECT * FROM " . static::$activities_table_name . " WHERE section_id = '$sectionId' ORDER BY day, start_time, end_time",
+            static::$wpdb->prepare(
+                "SELECT * FROM {$table_name} WHERE section_id = %s ORDER BY day, start_time, end_time",
+                $sectionId
+            )
         );
     }
 
@@ -282,9 +306,16 @@ class BaseActivityService
      * @return array An array of activity IDs corresponding to the given section.
      * @since 1.0.0
      */
-    static function listSectionActivityIds( string $sectionId )
+    static function listSectionActivityIds( string $sectionId ): array
     {
-        return static::$wpdb->get_col( "SELECT uid FROM " . static::$activities_table_name . " WHERE section_id = '$sectionId'" );
+        $table_name = static::$activities_table_name;
+
+        return static::$wpdb->get_col(
+            static::$wpdb->prepare(
+                "SELECT uid FROM {$table_name} WHERE section_id = %s",
+                $sectionId
+            )
+        );
     }
 
     /**
@@ -296,14 +327,15 @@ class BaseActivityService
      */
     static function listPostActivities( int $post_id ): array
     {
-        {
-            return static::$wpdb->get_results(
-                static::$wpdb->prepare(
-                    "SELECT a.* FROM " . static::$activities_table_name . " a INNER JOIN " . static::$activities_link_table_name . " pa ON a.uid = pa.activity_uid WHERE pa.post_id = %d ORDER BY day, start_time, end_time",
-                    $post_id
-                )
-            );
-        }
+        $table_name = static::$activities_table_name;
+        $link_table_name = static::$activities_link_table_name;
+
+        return static::$wpdb->get_results(
+            static::$wpdb->prepare(
+                "SELECT a.* FROM {$table_name} a INNER JOIN {$link_table_name} pa ON a.uid = pa.activity_uid WHERE pa.post_id = %d ORDER BY day, start_time, end_time",
+                $post_id
+            )
+        );
     }
 
     /**
@@ -315,9 +347,11 @@ class BaseActivityService
      */
     static function listPostActivityIds( int $post_id )
     {
+        $link_table_name = static::$activities_link_table_name;
+
         return static::$wpdb->get_col(
             static::$wpdb->prepare(
-                "SELECT activity_uid FROM " . static::$activities_link_table_name . " WHERE post_id = %d",
+                "SELECT activity_uid FROM {$link_table_name} WHERE post_id = %d",
                 $post_id
             )
         );
@@ -332,9 +366,11 @@ class BaseActivityService
      */
     static function listActivityPostIds( string $activity_id )
     {
+        $link_table_name = static::$activities_link_table_name;
+
         return static::$wpdb->get_col(
             static::$wpdb->prepare(
-                "SELECT post_id FROM " . static::$activities_link_table_name . " WHERE activity_uid = %s",
+                "SELECT post_id FROM {$link_table_name} WHERE activity_uid = %s",
                 $activity_id
             )
         );

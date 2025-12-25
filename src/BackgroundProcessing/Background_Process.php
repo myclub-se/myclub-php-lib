@@ -749,13 +749,11 @@ abstract class Background_Process extends Async_Request
             $interval
         );
 
-        // Allow consumers to override or translate the label
         $label = apply_filters( 'myclub_common_cron_interval_label', $interval );
 
         // Add the custom schedule
         $schedules[ $this->cron_interval_identifier ] = array(
             'interval' => MINUTE_IN_SECONDS * $interval,
-            /* translators: Display string for the cron interval */
             'display'  => $label,
         );
 

@@ -737,6 +737,7 @@ abstract class Background_Process extends Async_Request
 
         // Build the display label safely with plural handling
         $label = sprintf(
+            /* translators: Display string for the cron interval */
             esc_html(
                 _n(
                     'Every minute',

@@ -224,6 +224,16 @@ class BaseRestApi
         return $decoded;
     }
 
+    /**
+     * Retrieves a specific section and its associated activities from the MyClub backend API.
+     *
+     * @param string $sectionId The unique identifier of the section to retrieve.
+     * @return stdClass The section data fetched from the API. If the API key is empty, it returns an error response.
+     *                  If there is an error in the API call or the section data cannot be loaded, it logs an error
+     *                  and returns a response with an empty array and a status code of 500. If successful, it
+     *                  includes associated activities in the section data.
+     * @since 1.0.0
+     */
     public function loadSection( string $sectionId )
     {
         $check_empty_key = $this->checkApiKey();
@@ -257,6 +267,7 @@ class BaseRestApi
      * @return stdClass The sections fetched from the API. If the API key is empty, it returns an appropriate response.
      *                  If there is an error during the API call, it returns an object containing an empty result array
      *                  with a status code of 500. Otherwise, it returns the decoded sections data.
+     * @since 1.0.0
      */
     public function loadSections()
     {
@@ -314,6 +325,15 @@ class BaseRestApi
         return $decoded;
     }
 
+    /**
+     * Fetches the list of bookable items from the MyClub backend API.
+     *
+     * @return stdClass The bookable items retrieved from the API. If the API key is missing, it returns an object with
+     *                   an empty result array and a status code of 401. In case of an API call error, it logs the error,
+     *                   and returns an object with an empty result array and a status code of 500. On success, it returns
+     *                   the decoded list of bookable items.
+     * @since 1.0.0
+     */
     public function loadBookables()
     {
         $service_path = 'bookables/';
@@ -337,7 +357,16 @@ class BaseRestApi
         return $decoded;
     }
 
-    public function loadBookableSlots(string $bookableId = null, string $start_date = null, string $end_date = null)
+    /**
+     * Loads bookable slots for a given bookable ID within an optional date range.
+     *
+     * @param string|null $bookableId The ID of the bookable entity to retrieve slots for. If null, the method returns false.
+     * @param string|null $start_date Optional start date for filtering the slots. If null, no start date is applied.
+     * @param string|null $end_date Optional end date for filtering the slots. If null, no end date is applied.
+     * @return mixed The decoded response containing bookable slots if successful. Returns false if the API key is invalid or the bookable ID is null. Logs an error and may return an error response if the API call fails.
+     * @since 1.0.0
+     */
+    public function loadBookableSlots( string $bookableId = null, string $start_date = null, string $end_date = null)
     {
         $check_empty_key = $this->checkApiKey();
 
@@ -368,7 +397,16 @@ class BaseRestApi
         return $decoded;
     }
 
-    public function loadBookableSlot(string $bookableId = null, string $slotId = null)
+    /**
+     * Retrieves a specific bookable slot based on the provided bookable ID and slot ID.
+     *
+     * @param string|null $bookableId The ID of the bookable resource. If not provided, the method will return false.
+     * @param string|null $slotId The ID of the slot to be retrieved. If not provided, the method will return false.
+     * @return stdClass|false The bookable slot details fetched from the API as a decoded object, or false if the API key
+     *                        is invalid, input parameters are null, or an error occurs during the API call.
+     * @since 1.0.0
+     */
+    public function loadBookableSlot( string $bookableId = null, string $slotId = null)
     {
         $check_empty_key = $this->checkApiKey();
 
@@ -390,7 +428,22 @@ class BaseRestApi
         return $decoded;
     }
 
-    public function bookSlot(string $bookableId, string $slotId, string $startTime, string $endTime, string $email, string $firstName = null, string $lastName = null)
+    /**
+     * Books a slot for a specified bookable item in the system.
+     *
+     * @param string $bookableId The ID of the bookable item.
+     * @param string $slotId The ID of the slot to be booked.
+     * @param string $startTime The start time of the booking in a valid datetime format.
+     * @param string $endTime The end time of the booking in a valid datetime format.
+     * @param string $email The email address of the individual booking the slot.
+     * @param string|null $firstName The first name of the individual booking the slot (optional).
+     * @param string|null $lastName The last name of the individual booking the slot (optional).
+     *
+     * @return mixed The decoded API response resulting from the booking operation. Returns false if the API key is invalid
+     *               or missing. If an error occurs during the API call, logs the error and returns the API's error response.
+     * @since 1.0.0
+     */
+    public function bookSlot( string $bookableId, string $slotId, string $startTime, string $endTime, string $email, string $firstName = null, string $lastName = null)
     {
         $check_empty_key = $this->checkApiKey();
 
@@ -429,13 +482,19 @@ class BaseRestApi
         }
     }
 
-    protected function getPostArgs(array $data = [])
+    /**
+     * Prepares the arguments for an HTTP POST request.
+     *
+     * @param array $data An optional array of data to include in the request body. Defaults to an empty array.
+     * @return array The prepared POST request arguments, including timeout, JSON-encoded body, and custom headers.
+     * @since 1.0.0
+     */
+    protected function getPostArgs( array $data = []): array
     {
         return array(
             'timeout' => 5,
             'body' => json_encode($data),
-            'headers' => $this->createRequestHeaders(),
-            'sslverify' => apply_filters( 'https_local_ssl_verify', false ), // Local requests, fine to pass false.
+            'headers' => $this->createRequestHeaders()
         );
     }
 

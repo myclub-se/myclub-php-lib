@@ -732,15 +732,30 @@ abstract class Background_Process extends Async_Request
      *
      * @return mixed
      */
-    public function schedule_cron_healthcheck( $schedules )
-    {
+    public function schedule_cron_healthcheck( $schedules ) {
         $interval = $this->get_cron_interval();
 
-        // Adds an "Every NNN Minute(s)" schedule to the existing cron schedules.
-        $schedules[ $this->cron_interval_identifier ] = array (
+        // Build the display label safely with plural handling
+        $label = sprintf(
+            esc_html(
+                _n(
+                    'Every minute',
+                    'Every %d minutes',
+                    $interval,
+                    'default'
+                )
+            ),
+            $interval
+        );
+
+        // Allow consumers to override or translate the label
+        $label = apply_filters( 'myclub_common_cron_interval_label', $interval );
+
+        // Add the custom schedule
+        $schedules[ $this->cron_interval_identifier ] = array(
             'interval' => MINUTE_IN_SECONDS * $interval,
-            /* translators: 1: the interval in minutes for the cron job */
-            'display'  => 1 === $interval ? esc_html__( 'Every minute' ) : sprintf( esc_html__( 'Every %d minutes' ), $interval ),
+            /* translators: Display string for the cron interval */
+            'display'  => $label,
         );
 
         return $schedules;

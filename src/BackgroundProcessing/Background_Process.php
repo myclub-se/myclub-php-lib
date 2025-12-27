@@ -749,7 +749,7 @@ abstract class Background_Process extends Async_Request
             $interval
         );
 
-        $label = apply_filters( 'myclub_common_cron_interval_label', $interval );
+        $label = apply_filters( 'myclub_common_cron_interval_label', $label, $interval );
 
         // Add the custom schedule
         $schedules[ $this->cron_interval_identifier ] = array(

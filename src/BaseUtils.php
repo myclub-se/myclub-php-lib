@@ -38,6 +38,27 @@ class BaseUtils
     }
 
     /**
+     * Retrieves the version of a specified plugin from the WordPress plugins directory.
+     *
+     * @param string $plugin_name The plugin's file path relative to the plugins directory (e.g., 'plugin-folder/plugin-file.php').
+     *
+     * @return string The version of the plugin if found, or an empty string if the plugin does not exist or the version is not specified.
+     */
+    static function getPluginVersion( string $plugin_name ): string
+    {
+        static $plugins = null;
+
+        if ( null === $plugins ) {
+            if ( ! function_exists( 'get_plugins' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+            }
+            $plugins = get_plugins();
+        }
+
+        return $plugins[ $plugin_name . '.php' ]['Version'] ?? '';
+    }
+
+    /**
      * Clears the cache for a specific page or post based on the detected caching plugin.
      *
      * @param int $post_id The ID of the post or page whose cache needs to be cleared.

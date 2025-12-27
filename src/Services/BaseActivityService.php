@@ -51,6 +51,7 @@ class BaseActivityService
 
         $activities_table = static::$activities_table_name;
         $activities_link_table = static::$activities_link_table_name;
+        $activities_unique_key = static::$activities_unique_key;
         $posts_table = static::$wpdb->prefix . 'posts';
 
         $activities_table_sql = "

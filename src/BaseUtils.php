@@ -38,13 +38,13 @@ class BaseUtils
     }
 
     /**
-     * Retrieves the version of a specified plugin from the WordPress plugins directory.
+     * Retrieves the version of a plugin given its main file name.
      *
-     * @param string $plugin_name The plugin's file path relative to the plugins directory (e.g., 'plugin-folder/plugin-file.php').
+     * @param string $main_file_name The main file name of the plugin (without the .php extension).
      *
-     * @return string The version of the plugin if found, or an empty string if the plugin does not exist or the version is not specified.
+     * @return string The version number of the plugin if found, or an empty string if not found.
      */
-    static function getPluginVersion( string $plugin_name ): string
+    static function getPluginVersion( string $main_file_name ): string
     {
         static $plugins = null;
 
@@ -55,7 +55,14 @@ class BaseUtils
             $plugins = get_plugins();
         }
 
-        return $plugins[ $plugin_name . '.php' ]['Version'] ?? '';
+        // Search the plugins array for a key that ends with our main file name
+        foreach ( $plugins as $plugin_path => $plugin_data ) {
+            if ( basename( $plugin_path ) === $main_file_name . '.php' ) {
+                return $plugin_data['Version'] ?? '';
+            }
+        }
+
+        return '';
     }
 
     /**

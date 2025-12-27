@@ -21,6 +21,7 @@ class BaseActivityService
 
     protected static string $activities_table_suffix = '';
     protected static string $activities_link_table_suffix = '';
+    protected static string $activities_unique_key = '';
 
     /**
      * Initializes the database connection and sets up the table name for activities.
@@ -79,7 +80,7 @@ class BaseActivityService
             post_id BIGINT UNSIGNED NOT NULL,
             activity_uid varchar(20) NOT NULL,
             PRIMARY KEY (id),
-            UNIQUE KEY unique_post_activity (post_id, activity_uid),
+            UNIQUE KEY {$activities_unique_key} (post_id, activity_uid),
             FOREIGN KEY (post_id) REFERENCES {$posts_table}(ID) ON DELETE CASCADE,
             FOREIGN KEY (activity_uid) REFERENCES {$activities_table}(uid) ON DELETE CASCADE
         ) {$charset_collate};

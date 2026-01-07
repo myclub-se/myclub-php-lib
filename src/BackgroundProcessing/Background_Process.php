@@ -739,12 +739,7 @@ abstract class Background_Process extends Async_Request
         $label = sprintf(
             /* translators: Display string for the cron interval */
             esc_html(
-                _n(
-                    'Every minute',
-                    'Every %d minutes',
-                    $interval,
-                    'default'
-                )
+                $interval === 1 ? 'Every minute' : 'Every %d minutes',
             ),
             $interval
         );

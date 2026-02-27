@@ -526,7 +526,9 @@ class BaseRestApi
         return array(
             'timeout' => 5,
             'body' => json_encode($data),
-            'headers' => $this->createRequestHeaders()
+            'headers' => array_merge($this->createRequestHeaders(), [
+                'Content-Type' => 'application/json',
+            ])
         );
     }
 

@@ -466,6 +466,38 @@ class BaseRestApi
         return $decoded;
     }
 
+    /**
+     * Books multiple slots in a single bulk request.
+     *
+     * @param string $email The email address of the individual booking the slots.
+     * @param array $sessions Array of session data. Each entry must contain: slot_id, start_time, end_time.
+     *                        Optionally: title, bookable_zones_taken.
+     * @param string|null $firstName The first name of the individual booking the slots (optional).
+     * @param string|null $lastName The last name of the individual booking the slots (optional).
+     *
+     * @return mixed The decoded API response. Returns false if the API key is invalid or missing.
+     * @since 1.0.0
+     */
+    public function bookSlotsBulk( string $email, array $sessions, string $firstName = null, string $lastName = null)
+    {
+        $check_empty_key = $this->checkApiKey();
+
+        if ( !is_null( $check_empty_key ) ) {
+            return false;
+        }
+        $args = array(
+            "email" => $email,
+            "first_name" => $firstName,
+            "last_name" => $lastName,
+            "sessions" => $sessions,
+        );
+        $decoded = $this->post("bookables/sessions/bulk/", $args);
+        if (is_wp_error($decoded)) {
+            error_log('Unable to bulk book slots: Error occurred in API call');
+        }
+        return $decoded;
+    }
+
     private function post(string $service_path, array $data = [])
     {
         $args = $this->getPostArgs($data);
@@ -494,7 +526,9 @@ class BaseRestApi
         return array(
             'timeout' => 5,
             'body' => json_encode($data),
-            'headers' => $this->createRequestHeaders()
+            'headers' => array_merge($this->createRequestHeaders(), [
+                'Content-Type' => 'application/json',
+            ])
         );
     }
 
@@ -578,6 +612,6 @@ class BaseRestApi
      */
     private function getServerUrl( string $path ): string
     {
-        return self::MYCLUB_SERVER_API_PATH . $path;
+        return static::MYCLUB_SERVER_API_PATH . $path;
     }
 }

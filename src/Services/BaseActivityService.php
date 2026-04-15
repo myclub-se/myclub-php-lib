@@ -160,7 +160,7 @@ class BaseActivityService
             'start_time'    => $activity->start_time,
             'end_time'      => $activity->end_time,
             'location'      => $activity->location,
-            'description'   => htmlspecialchars( str_replace( "\n", "<br>", $activity->description ), ENT_QUOTES, 'UTF-8' ),
+            'description'   => wp_kses_post( $activity->description ),
             'calendar_name' => $activity->calendar_name,
             'type'          => $activity->type,
             'base_type'     => $activity->base_type,

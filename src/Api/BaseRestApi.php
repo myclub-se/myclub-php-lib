@@ -69,8 +69,9 @@ class BaseRestApi
             return $check_empty_key;
         }
 
-        $decoded = $this->get( $service_path, [ 'limit'   => "null",
-                                                "version" => "2"
+        $decoded = $this->get( $service_path, [
+            'limit'   => "null",
+            "version" => "2"
         ] );
 
         if ( is_wp_error( $decoded ) ) {
@@ -108,8 +109,9 @@ class BaseRestApi
             if ( $members->status === 200 ) {
                 $decoded->result->members = $members->result->results;
 
-                $activities = $this->get( "teams/$groupId/calendar/", [ "limit"   => "null",
-                                                                        "version" => "2"
+                $activities = $this->get( "teams/$groupId/calendar/", [
+                    "limit"   => "null",
+                    "version" => "2"
                 ] );
                 if ( $activities->status === 200 ) {
                     $decoded->result->activities = $activities->result->results;
@@ -247,7 +249,11 @@ class BaseRestApi
         if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
             error_log( 'Unable to load section: Error occurred in API call' );
         } else {
-            $activities = $this->get( "calendar/", [ "limit"   => "null", "section_id" => $sectionId ] );
+            $activities = $this->get( "calendar/", [
+                "limit"      => "null",
+                "section_id" => $sectionId,
+                "version"    => "2"
+            ] );
             if ( $activities->status === 200 ) {
                 $decoded->result->activities = $activities->result->results;
             } else {
@@ -309,9 +315,10 @@ class BaseRestApi
             return $check_empty_key;
         }
 
-        $decoded = $this->get( $service_path, [ 'limit'   => "null",
-                                                "version" => "2",
-                                                "section" => $sectionId
+        $decoded = $this->get( $service_path, [
+            'limit'   => "null",
+            "version" => "2",
+            "section" => $sectionId
         ] );
 
         if ( is_wp_error( $decoded ) ) {
@@ -344,10 +351,10 @@ class BaseRestApi
             return $check_empty_key;
         }
 
-        $decoded = $this->get($service_path, ['limit' => "null"]);
+        $decoded = $this->get( $service_path, [ 'limit' => "null" ] );
 
-        if (is_wp_error($decoded)) {
-            error_log('Unable to load bookable items: Error occurred in API call');
+        if ( is_wp_error( $decoded ) ) {
+            error_log( 'Unable to load bookable items: Error occurred in API call' );
             $return_value = new stdClass();
             $return_value->result = [];
             $return_value->status = 500;
@@ -366,7 +373,7 @@ class BaseRestApi
      * @return mixed The decoded response containing bookable slots if successful. Returns false if the API key is invalid or the bookable ID is null. Logs an error and may return an error response if the API call fails.
      * @since 1.0.0
      */
-    public function loadBookableSlots( string $bookableId = null, string $start_date = null, string $end_date = null)
+    public function loadBookableSlots( string $bookableId = null, string $start_date = null, string $end_date = null )
     {
         $check_empty_key = $this->checkApiKey();
 
@@ -374,24 +381,24 @@ class BaseRestApi
             return false;
         }
 
-        if (is_null($bookableId)) {
+        if ( is_null( $bookableId ) ) {
             return false;
         }
-        $args = array(
+        $args = array (
             "limit" => "null"
         );
-        if (!is_null($start_date)) {
-            $args["start_date"] = $start_date;
+        if ( !is_null( $start_date ) ) {
+            $args[ "start_date" ] = $start_date;
         }
-        if (!is_null($end_date)) {
-            $args["end_date"] = $end_date;
+        if ( !is_null( $end_date ) ) {
+            $args[ "end_date" ] = $end_date;
         }
 
-        $service_path = sprintf("bookables/%s/slots/", $bookableId);
+        $service_path = sprintf( "bookables/%s/slots/", $bookableId );
 
-        $decoded = $this->get($service_path, $args);
-        if (is_wp_error($decoded) || $decoded->status !== 200) {
-            error_log('Unable to load bookable slots: Error occurred in API call');
+        $decoded = $this->get( $service_path, $args );
+        if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
+            error_log( 'Unable to load bookable slots: Error occurred in API call' );
         }
 
         return $decoded;
@@ -406,7 +413,7 @@ class BaseRestApi
      *                        is invalid, input parameters are null, or an error occurs during the API call.
      * @since 1.0.0
      */
-    public function loadBookableSlot( string $bookableId = null, string $slotId = null)
+    public function loadBookableSlot( string $bookableId = null, string $slotId = null )
     {
         $check_empty_key = $this->checkApiKey();
 
@@ -414,15 +421,15 @@ class BaseRestApi
             return false;
         }
 
-        if (is_null($bookableId) || is_null($slotId)) {
+        if ( is_null( $bookableId ) || is_null( $slotId ) ) {
             return false;
         }
 
-        $service_path = sprintf("bookables/%s/slots/%s/", $bookableId, $slotId);
+        $service_path = sprintf( "bookables/%s/slots/%s/", $bookableId, $slotId );
 
-        $decoded = $this->get($service_path);
-        if (is_wp_error($decoded) || $decoded->status !== 200) {
-            error_log('Unable to load bookable slots: Error occurred in API call');
+        $decoded = $this->get( $service_path );
+        if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
+            error_log( 'Unable to load bookable slots: Error occurred in API call' );
         }
 
         return $decoded;
@@ -443,25 +450,25 @@ class BaseRestApi
      *               or missing. If an error occurs during the API call, logs the error and returns the API's error response.
      * @since 1.0.0
      */
-    public function bookSlot( string $bookableId, string $slotId, string $startTime, string $endTime, string $email, string $firstName = null, string $lastName = null)
+    public function bookSlot( string $bookableId, string $slotId, string $startTime, string $endTime, string $email, string $firstName = null, string $lastName = null )
     {
         $check_empty_key = $this->checkApiKey();
 
         if ( !is_null( $check_empty_key ) ) {
             return false;
         }
-        $args = array(
-            "start_time" => $startTime,
-            "end_time" => $endTime,
-            "email" => $email,
-            "first_name" => $firstName,
-            "last_name" => $lastName,
+        $args = array (
+            "start_time"           => $startTime,
+            "end_time"             => $endTime,
+            "email"                => $email,
+            "first_name"           => $firstName,
+            "last_name"            => $lastName,
             "bookable_zones_taken" => 1,
         );
-        $service_path = sprintf("bookables/%s/slots/%s/book/", $bookableId, $slotId);
-        $decoded = $this->post($service_path, $args);
-        if (is_wp_error($decoded)) {
-            error_log('Unable to book slot: Error occurred in API call');
+        $service_path = sprintf( "bookables/%s/slots/%s/book/", $bookableId, $slotId );
+        $decoded = $this->post( $service_path, $args );
+        if ( is_wp_error( $decoded ) ) {
+            error_log( 'Unable to book slot: Error occurred in API call' );
         }
         return $decoded;
     }
@@ -478,38 +485,38 @@ class BaseRestApi
      * @return mixed The decoded API response. Returns false if the API key is invalid or missing.
      * @since 1.0.0
      */
-    public function bookSlotsBulk( string $email, array $sessions, string $firstName = null, string $lastName = null)
+    public function bookSlotsBulk( string $email, array $sessions, string $firstName = null, string $lastName = null )
     {
         $check_empty_key = $this->checkApiKey();
 
         if ( !is_null( $check_empty_key ) ) {
             return false;
         }
-        $args = array(
-            "email" => $email,
+        $args = array (
+            "email"      => $email,
             "first_name" => $firstName,
-            "last_name" => $lastName,
-            "sessions" => $sessions,
+            "last_name"  => $lastName,
+            "sessions"   => $sessions,
         );
-        $decoded = $this->post("bookables/sessions/bulk/", $args);
-        if (is_wp_error($decoded)) {
-            error_log('Unable to bulk book slots: Error occurred in API call');
+        $decoded = $this->post( "bookables/sessions/bulk/", $args );
+        if ( is_wp_error( $decoded ) ) {
+            error_log( 'Unable to bulk book slots: Error occurred in API call' );
         }
         return $decoded;
     }
 
-    private function post(string $service_path, array $data = [])
+    private function post( string $service_path, array $data = [] )
     {
-        $args = $this->getPostArgs($data);
-        $response = wp_remote_post($this->getServerUrl($service_path), $args);
+        $args = $this->getPostArgs( $data );
+        $response = wp_remote_post( $this->getServerUrl( $service_path ), $args );
 
-        if (is_wp_error($response)) {
-            error_log('Error occurred during API get call, additional info: ' . $response->get_error_message());
+        if ( is_wp_error( $response ) ) {
+            error_log( 'Error occurred during API get call, additional info: ' . $response->get_error_message() );
             return $response;
         } else {
             $value = new stdClass();
-            $value->result = json_decode(wp_remote_retrieve_body($response));
-            $value->status = $response['response']['code'];
+            $value->result = json_decode( wp_remote_retrieve_body( $response ) );
+            $value->status = $response[ 'response' ][ 'code' ];
             return $value;
         }
     }
@@ -521,14 +528,14 @@ class BaseRestApi
      * @return array The prepared POST request arguments, including timeout, JSON-encoded body, and custom headers.
      * @since 1.0.0
      */
-    protected function getPostArgs( array $data = []): array
+    protected function getPostArgs( array $data = [] ): array
     {
-        return array(
+        return array (
             'timeout' => 5,
-            'body' => json_encode($data),
-            'headers' => array_merge($this->createRequestHeaders(), [
+            'body'    => json_encode( $data ),
+            'headers' => array_merge( $this->createRequestHeaders(), [
                 'Content-Type' => 'application/json',
-            ])
+            ] )
         );
     }
 

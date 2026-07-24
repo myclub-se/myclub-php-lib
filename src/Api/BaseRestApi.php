@@ -343,9 +343,7 @@ class BaseRestApi
      */
     public function loadBookables()
     {
-        // Kept on the root `bookables/` route — the external `bookings/` namespace
-        // does not mirror the bookable-item list (only the booking-action routes).
-        $service_path = 'bookables/';
+        $service_path = 'bookings/bookables/';
 
         $check_empty_key = $this->checkApiKey();
 

@@ -343,7 +343,7 @@ class BaseRestApi
      */
     public function loadBookables()
     {
-        $service_path = 'bookables/';
+        $service_path = 'bookings/bookables/';
 
         $check_empty_key = $this->checkApiKey();
 
@@ -394,7 +394,7 @@ class BaseRestApi
             $args[ "end_date" ] = $end_date;
         }
 
-        $service_path = sprintf( "bookables/%s/slots/", $bookableId );
+        $service_path = sprintf( "bookings/bookables/%s/slots/", $bookableId );
 
         $decoded = $this->get( $service_path, $args );
         if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
@@ -425,7 +425,7 @@ class BaseRestApi
             return false;
         }
 
-        $service_path = sprintf( "bookables/%s/slots/%s/", $bookableId, $slotId );
+        $service_path = sprintf( "bookings/bookables/%s/slots/%s/", $bookableId, $slotId );
 
         $decoded = $this->get( $service_path );
         if ( is_wp_error( $decoded ) || $decoded->status !== 200 ) {
@@ -465,7 +465,7 @@ class BaseRestApi
             "last_name"            => $lastName,
             "bookable_zones_taken" => 1,
         );
-        $service_path = sprintf( "bookables/%s/slots/%s/book/", $bookableId, $slotId );
+        $service_path = sprintf( "bookings/bookables/%s/slots/%s/book/", $bookableId, $slotId );
         $decoded = $this->post( $service_path, $args );
         if ( is_wp_error( $decoded ) ) {
             error_log( 'Unable to book slot: Error occurred in API call' );
@@ -498,7 +498,7 @@ class BaseRestApi
             "last_name"  => $lastName,
             "sessions"   => $sessions,
         );
-        $decoded = $this->post( "bookables/sessions/bulk/", $args );
+        $decoded = $this->post( "bookings/bookables/sessions/bulk/", $args );
         if ( is_wp_error( $decoded ) ) {
             error_log( 'Unable to bulk book slots: Error occurred in API call' );
         }

@@ -228,7 +228,7 @@ class BaseActivityService
 
         if ( count( static::listActivityPostIds( $activity_id ) ) === 0 ) {
             $activity = static::getActivity( $activity_id );
-            if ( !$activity->show_on_club_calendar ) {
+            if ( $activity === null || !$activity->show_on_club_calendar ) {
                 static::deleteActivity( $activity_id );
             }
         }

@@ -271,7 +271,7 @@ class BaseUtils
             unset( $activity->uid );
             $activity->description = str_replace( '<br /> <br />', '<br />', $activity->description );
             $activity->description = str_replace( '<br /><br />', '<br />', $activity->description );
-            $activity->description = addslashes( str_replace( '<br /><br /><br />', '<br /><br />', $activity->description ) );
+            $activity->description = str_replace( '<br /><br /><br />', '<br /><br />', $activity->description );
             if ( empty( trim( wp_strip_all_tags( $activity->description ) ) ) ) {
                 $activity->description = '';
             }

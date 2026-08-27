@@ -152,6 +152,16 @@ class BaseActivityService
      */
     static function createOrUpdateActivity( stdClass $activity, array $calendar_array = [] ): bool
     {
+        // The MyClub API delivers plain text fields HTML escaped. Decode them on the way in so that the
+        // database holds the actual text - escaping is the responsibility of the code that outputs it.
+        foreach ( [ 'title', 'location', 'calendar_name', 'type', 'base_type', 'meet_up_place' ] as $field ) {
+            if ( isset( $activity->{$field} ) ) {
+                $activity->{$field} = html_entity_decode( $activity->{$field}, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+            }
+        }
+
+        $activity->description = wp_kses_post( $activity->description );
+
         $data = [
             'uid'           => $activity->uid,
             'section_id'    => $activity->section_id,
@@ -160,7 +170,7 @@ class BaseActivityService
             'start_time'    => $activity->start_time,
             'end_time'      => $activity->end_time,
             'location'      => $activity->location,
-            'description'   => wp_kses_post( $activity->description ),
+            'description'   => $activity->description,
             'calendar_name' => $activity->calendar_name,
             'type'          => $activity->type,
             'base_type'     => $activity->base_type,
@@ -179,22 +189,10 @@ class BaseActivityService
             unset( $data );
             $update = true;
         } else {
-            $compared_values = array_filter( [
-                "section_id",
-                "title",
-                "description",
-                "day",
-                "start_time",
-                "end_time",
-                "location",
-                "calendar_name",
-                "type",
-                "base_type",
-                "meet_up_time",
-                "meet_up_place",
-                "show_on_club_calendar"
-            ], function ( $key ) use ( $activity, $activity_row ) {
-                return isset( $activity->{$key}, $activity_row->{$key} ) && $activity->{$key} !== $activity_row->{$key};
+            // Compare the values that are about to be written with the ones that are stored. The database
+            // returns all column values as strings, so both sides are cast before they are compared.
+            $compared_values = array_filter( array_keys( $data ), function ( $key ) use ( $data, $activity_row ) {
+                return !property_exists( $activity_row, $key ) || (string) $data[ $key ] !== (string) $activity_row->{$key};
             } );
             static::$wpdb->update( static::$activities_table_name, $data, [ 'uid' => $activity->uid ] );
             $update = !empty( $compared_values );

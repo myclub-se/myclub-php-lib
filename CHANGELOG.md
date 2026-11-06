@@ -5,6 +5,18 @@ All notable changes to `myclub/common-lib` are documented in this file.
 The library is released as git tags on `main`; there is no version string in
 the source. Each heading below links a release to the changes it contains.
 
+## 1.0.7 - 2026-11-06
+
+### Fixed
+
+- `BaseImageService::addImage()` never found an existing image by its
+  `_source_image_url` meta. The `WP_Query` for the attachment didn't set a
+  `post_status`, so it only searched published posts, and attachments have the
+  status `inherit`. Existing images were only found through the fallback that
+  looks them up by name, so an image whose attachment had been renamed was
+  downloaded again. Both lookups now query attachments with the status
+  `inherit`.
+
 ## 1.0.6 - 2026-08-27
 
 ### Changed

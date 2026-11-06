@@ -74,9 +74,11 @@ class BaseImageService
         $meta_value = sanitize_text_field( $prefix . $image_url );
 
         // *** Step 1: Query for an existing attachment using _source_image_url ***
+        // Attachments have the post status 'inherit', which WP_Query doesn't include by default.
         $args = array (
             'posts_per_page' => 1,
             'post_type'      => 'attachment',
+            'post_status'    => 'inherit',
             'meta_query'     => [
                 [
                     'key'     => '_source_image_url',
@@ -93,6 +95,7 @@ class BaseImageService
             $args_fallback = array (
                 'posts_per_page' => 1,
                 'post_type'      => 'attachment',
+                'post_status'    => 'inherit',
                 'name'           => $name
             );
 
